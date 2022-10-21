@@ -7,8 +7,8 @@ import (
 	"net/http"
 	"time"
 
-	"kriol.camerontillett.net/internal/data"
-	"kriol.camerontillett.net/internal/validator"
+	"TODO.alysianorales.net/internal/data"
+	"TODO.alysianorales.net/internal/validator"
 )
 
 //createEntryHandler for the "POST /v1/entry" endpoint
