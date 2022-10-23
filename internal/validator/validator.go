@@ -25,7 +25,7 @@ func New() *Validator {
 	}
 }
 
-// Valid() checks the Errors map for entries
+// Valid() checks the Errors map for todos
 func (v *Validator) Valid() bool {
 	return len(v.Errors) == 0
 }
@@ -51,7 +51,7 @@ func ValidWebsite(website string) bool {
 	return err == nil
 }
 
-// AddError() adds an error entry to the Errors map
+// AddError() adds an error todo to the Errors map
 func (v *Validator) AddError(key, message string) {
 	if _, exists := v.Errors[key]; !exists {
 		v.Errors[key] = message
@@ -59,7 +59,7 @@ func (v *Validator) AddError(key, message string) {
 }
 
 // Check() performs the validation checks and calls the AddError()
-// method in turn if an error entry needs to be added
+// method in turn if an error todo needs to be added
 func (v *Validator) Check(ok bool, key, message string) {
 	if !ok {
 		v.AddError(key, message)

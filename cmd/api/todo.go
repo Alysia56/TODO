@@ -1,4 +1,4 @@
-// Filename/cmd/api/entry.go
+// Filename/cmd/api/todo.go
 
 package main
 
@@ -11,8 +11,8 @@ import (
 	"alysianorales.net/TODO/internal/validator"
 )
 
-//createEntryHandler for the "POST /v1/entry" endpoint
-func (app *application) createEntryHandler(w http.ResponseWriter, r *http.Request) {
+//createTodoHandler for the "POST /v1/todo" endpoint
+func (app *application) createTodoHandler(w http.ResponseWriter, r *http.Request) {
 	// Our Target Decode destination
 	var input struct {
 		Name    string   `json:"name"`
@@ -53,12 +53,24 @@ func (app *application) createEntryHandler(w http.ResponseWriter, r *http.Reques
 		app.failedValidationResponse(w, r, v.Errors)
 		return
 	}
-	// Display the Request
-	fmt.Fprintf(w, "%+v\n", input)
+	// Create a School
+	err = app.models.Todo.Insert(todo)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+	}
+	// Create a Location header for the newly created resource/List
+	headers := make(http.Header)
+	headers.Set("Location", fmt.Sprintf("/v1/todo/%d", todo.ID))
+	//Write the JSON response with 201 - Created status code with the body
+	//being the List data and the header being the headers map
+	err = app.writeJSON(w, http.StatusCreated, envelope{"todo": todo}, headers)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+	}
 }
 
-//createEntryHandler for the "GET /v1/entry/:id" endpoint
-func (app *application) showEntryHandler(w http.ResponseWriter, r *http.Request) {
+//createTodoHandler for the "GET /v1/todo/:id" endpoint
+func (app *application) showTodoHandler(w http.ResponseWriter, r *http.Request) {
 	// Get the value of the "id" parameter
 	id, err := app.readIDParam(r)
 	if err != nil {
@@ -66,21 +78,23 @@ func (app *application) showEntryHandler(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	// Create a new instance of the Entries struct containing the ID we extracted
+	// Create a new instance of the Todos struct containing the ID we extracted
 	//from our URL and some sample data
-	entry := data.Todo{
+	todo := data.Todo{
 		ID:        id,
 		CreatedAt: time.Now(),
 		Name:      "Yo Mama",
 		Level:     "High School",
 		Contact:   "Inita Lyfe",
 		Phone:     "666-7777",
+		Email:     "wehyouwant@gmail.com",
+		Website:   "http.nobodylikeyuh.com",
 		Address:   "14 Upyoaph Street",
 		Mode:      []string{"blended", "online"},
 		Version:   1,
 	}
 
-	err = app.writeJSON(w, http.StatusOK, envelope{"entry": entry}, nil)
+	err = app.writeJSON(w, http.StatusOK, envelope{"todo": todo}, nil)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 	}

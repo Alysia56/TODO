@@ -1,4 +1,4 @@
-// Filname: internal/data/entries.go
+// Filname: internal/data/todos.go
 
 package data
 
@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"alysianorales.net/TODO/internal/validator"
+	"github.com/lib/pq"
 )
 
 type Todo struct {
@@ -47,9 +48,9 @@ func ValidateList(v *validator.Validator, todo *Todo) {
 	v.Check(len(todo.Address) <= 500, "address", "must not be more than 500 bytes long")
 
 	v.Check(todo.Mode != nil, "mode", "must be provided")
-	v.Check(len(todo.Mode) >= 1, "mode", "must contain at least one entries")
-	v.Check(len(todo.Mode) <= 5, "mode", "must contain at most 5 entries")
-	v.Check(validator.Unique(todo.Mode), "mode", "must not contain duplicate entries")
+	v.Check(len(todo.Mode) >= 1, "mode", "must contain at least one todos")
+	v.Check(len(todo.Mode) <= 5, "mode", "must contain at most 5 todos")
+	v.Check(validator.Unique(todo.Mode), "mode", "must not contain duplicate todos")
 }
 
 // Define a ListModel which wraps a sql.DB connection pool
@@ -59,7 +60,18 @@ type TodoModel struct {
 
 // Insert () allows us to create a new List
 func (m TodoModel) Insert(todo *Todo) error {
-	return nil
+	query := `
+	INSERT INTO todo (name, level, contact, phone, email, website, address, mode)
+	VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+	RETURNING id, created_at, version
+	`
+	//Collect data fields into a slice
+	args := []interface{}{
+		todo.Name, todo.Level, todo.Contact,
+		todo.Phone, todo.Email, todo.Website,
+		todo.Address, pq.Array(todo.Mode),
+	}
+	return m.DB.QueryRow(query, args...).Scan(&todo.ID, &todo.CreatedAt, &todo.Version)
 }
 
 //Get() allows us to retrieve a specific List
