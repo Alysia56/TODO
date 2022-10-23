@@ -54,7 +54,7 @@ func (app *application) createTodoHandler(w http.ResponseWriter, r *http.Request
 		app.failedValidationResponse(w, r, v.Errors)
 		return
 	}
-	// Create a School
+	// Create a Todo
 	err = app.models.Todo.Insert(todo)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
@@ -168,7 +168,7 @@ func (app *application) updateTodoHandler(w http.ResponseWriter, r *http.Request
 	todo.Website = input.Website
 	todo.Address = input.Address
 	todo.Mode = input.Mode
-	//Perform validation on the updated School.
+	//Perform validation on the updated Todo.
 	//If validation fails, then send a 422 - Unprocessable Entity response to the client
 	// Initialize a new Validator instance
 	v := validator.New()
@@ -178,7 +178,7 @@ func (app *application) updateTodoHandler(w http.ResponseWriter, r *http.Request
 		app.failedValidationResponse(w, r, v.Errors)
 		return
 	}
-	// Pass the updates School record to the Update() method
+	// Pass the updates Todo record to the Update() method
 	err = app.models.Todo.Update(todo)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
@@ -186,6 +186,32 @@ func (app *application) updateTodoHandler(w http.ResponseWriter, r *http.Request
 	}
 	//Write the data returned by Get()
 	err = app.writeJSON(w, http.StatusOK, envelope{"todo": todo}, nil)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+	}
+
+}
+
+func (app *application) deleteTodoHandler(w http.ResponseWriter, r *http.Request) {
+	id, err := app.readIDParam(r)
+	if err != nil {
+		app.notFoundResponse(w, r)
+		return
+	}
+	//Delete the School from the database. Send a 404 Not Found status code
+	//to the client if there is no matching record
+	err = app.models.Todo.Delete(id)
+	if err != nil {
+		switch {
+		case errors.Is(err, data.ErrRecordNotFound):
+			app.notFoundResponse(w, r)
+		default:
+			app.serverErrorResponse(w, r, err)
+		}
+		return
+	}
+	// Return 200 Status OK to the client with a success message
+	err = app.writeJSON(w, http.StatusOK, envelope{"message": "List successfully deleted"}, nil)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 	}
