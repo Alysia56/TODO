@@ -1,5 +1,6 @@
 Method  URL Pattern         Handler             Action
 GET     /v1/healtcheck      healtcheckHandler   Show application information
+GET     /v1/todo/           listTodoHandler     Show the details of all schools
 POST    /v1/todo/:id        createTodoHandler   Create a new list
 GET     /v1/todo/:id        showTodoHandler     shows details of a specific list
 PUT     /v1/todo/:id        updateTodoHandler   update details of a specific list

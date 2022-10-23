@@ -1,0 +1,7 @@
+curl "localhost:4000/v1/todo"
+curl "localhost:4000/v1/todo?name=avacado+house"
+curl "localhost:4000/v1/todo?level=high+school"
+curl "localhost:4000/v1/todo?mode=face-to-face"
+curl "localhost:4000/v1/todo?name=love+house&level=preschool"
+curl "localhost:4000/v1/todo?name=coconut"
+curl "localhost:4000/v1/todo?mode=face"
