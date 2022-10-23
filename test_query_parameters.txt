@@ -5,3 +5,14 @@ curl "localhost:4000/v1/todo?mode=face-to-face"
 curl "localhost:4000/v1/todo?name=love+house&level=preschool"
 curl "localhost:4000/v1/todo?name=coconut"
 curl "localhost:4000/v1/todo?mode=face"
+curl "localhost:4000/v1/todo?sort=name"
+
+                --PAGINATION TESTING--
+curl "localhost:4000/v1/todo?page=1&page_size=5"
+curl "localhost:4000/v1/todo?page=2&page_size=5"
+curl "localhost:4000/v1/todo?page=3&page_size=5"
+curl "localhost:4000/v1/todo?page=4&page_size=5"
+curl "localhost:4000/v1/todo?page=5&page_size=5"
+curl "localhost:4000/v1/todo?page=6&page_size=5"
+
+

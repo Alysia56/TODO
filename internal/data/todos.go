@@ -6,6 +6,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
 	"time"
 
 	"alysianorales.net/TODO/internal/validator"
@@ -204,28 +205,30 @@ func (m TodoModel) Delete(id int64) error {
 }
 
 //The GetAll() method returns a list of all the todos sorted by id
-func (m TodoModel) GetAll(name string, level string, mode []string, filters Filters) ([]*Todo, error) {
+func (m TodoModel) GetAll(name string, level string, mode []string, filters Filters) ([]*Todo, Metadata, error) {
 	//Construct the query
-	query := `
-		SELECT id, created_at, name, 
+	query := fmt.Sprintf(`
+		SELECT COUNT (*) OVER(), id, created_at, name, 
 				level, contact,phone, 
 				email, website, address, mode, version
 		FROM todo
 		WHERE (to_tsvector('simple', name) @@ plainto_tsquery('simple', $1) OR $1 = '')
 		AND (to_tsvector('simple', level) @@ plainto_tsquery('simple', $2) OR $2 = '')
 		AND (mode @> $3 OR $3 = '{}' )
-		ORDER BY id
-	`
+		ORDER BY %s %s, id ASC
+		LIMIT $4 OFFSET $5`, filters.sortColumn(), filters.sortOrder())
 	//Create a 3-second-timeout context
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 	//Execute the query
-	rows, err := m.DB.QueryContext(ctx, query, name, level, pq.Array(mode))
+	args := []interface{}{name, level, pq.Array(mode), filters.limit(), filters.offset()}
+	rows, err := m.DB.QueryContext(ctx, query, args...)
 	if err != nil {
-		return nil, err
+		return nil, Metadata{}, err
 	}
 	//Close the result set
 	defer rows.Close()
+	totalRecords := 0
 	//Initialize an empty slice to hold the Todo data
 	todos := []*Todo{}
 	//Iterate over the rows in the resultset
@@ -233,6 +236,7 @@ func (m TodoModel) GetAll(name string, level string, mode []string, filters Filt
 		var todo Todo
 		//Scan the values from the row into Todo
 		err := rows.Scan(
+			&totalRecords,
 			&todo.ID,
 			&todo.CreatedAt,
 			&todo.Name,
@@ -246,15 +250,16 @@ func (m TodoModel) GetAll(name string, level string, mode []string, filters Filt
 			&todo.Version,
 		)
 		if err != nil {
-			return nil, err
+			return nil, Metadata{}, err
 		}
 		//Add the List to our slice
 		todos = append(todos, &todo)
 	}
 	// Check for errors after looping through the results set
 	if err = rows.Err(); err != nil {
-		return nil, err
+		return nil, Metadata{}, err
 	}
+	metadata := calculateMetadata(totalRecords, filters.Page, filters.PageSize)
 	//Return the slice of Lists
-	return todos, nil
+	return todos, metadata, nil
 }
