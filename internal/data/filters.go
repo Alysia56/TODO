@@ -64,7 +64,7 @@ type Metadata struct {
 }
 
 //The calculateMetadata() function computes the values for the Metadata fields
-func calculateMetadata(TotalRecords int, page int, pageSize int) Metadata {
+func calculateMetadata(totalRecords int, page int, pageSize int) Metadata {
 	if totalRecords == 0 {
 		return Metadata{}
 	}
@@ -72,7 +72,7 @@ func calculateMetadata(TotalRecords int, page int, pageSize int) Metadata {
 		CurrentPage:  page,
 		PageSize:     pageSize,
 		FirstPage:    1,
-		LastPage:     int(math.Ceil(float64(totalrecords) / float64(pageSize))),
-		TotalRecords: TotalRecords,
+		LastPage:     int(math.Ceil(float64(totalRecords) / float64(pageSize))),
+		TotalRecords: totalRecords,
 	}
 }

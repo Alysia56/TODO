@@ -1,11 +1,25 @@
 curl "localhost:4000/v1/todo"
+
+
+
+                --TEXT SEARCH TESTING--
 curl "localhost:4000/v1/todo?name=avacado+house"
 curl "localhost:4000/v1/todo?level=high+school"
 curl "localhost:4000/v1/todo?mode=face-to-face"
 curl "localhost:4000/v1/todo?name=love+house&level=preschool"
 curl "localhost:4000/v1/todo?name=coconut"
 curl "localhost:4000/v1/todo?mode=face"
+
+
+
+                    --SORT TESTING--
 curl "localhost:4000/v1/todo?sort=name"
+curl "localhost:4000/v1/todo?sort=level"
+curl "localhost:4000/v1/todo?sort=contact"
+curl "localhost:4000/v1/todo?sort=id"
+curl "localhost:4000/v1/todo?sort=email"
+
+
 
                 --PAGINATION TESTING--
 curl "localhost:4000/v1/todo?page=1&page_size=5"
