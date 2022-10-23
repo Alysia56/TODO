@@ -122,7 +122,7 @@ func (app *application) showRandomString(w http.ResponseWriter, r *http.Request)
 }
 
 func (app *application) updateTodoHandler(w http.ResponseWriter, r *http.Request) {
-	//This method does a complete replacement
+	//This method does a partial replacement
 	//Get the id for the List that needs updating
 	id, err := app.readIDParam(r)
 	if err != nil {
@@ -142,14 +142,18 @@ func (app *application) updateTodoHandler(w http.ResponseWriter, r *http.Request
 		return
 	}
 	// Create an input struct to hold data read in from the client
+	//We update the input struct to use pointers because pointers
+	//have a default value of nil
+	//If a field remains nil, then we know that the client
+	//did not update it
 	var input struct {
-		Name    string   `json:"name"`
-		Level   string   `json:"level"`
-		Contact string   `json:"contact"`
-		Phone   string   `json:"phone"`
-		Email   string   `json:"email"`
-		Website string   `json:"website"`
-		Address string   `json:"address"`
+		Name    *string  `json:"name"`
+		Level   *string  `json:"level"`
+		Contact *string  `json:"contact"`
+		Phone   *string  `json:"phone"`
+		Email   *string  `json:"email"`
+		Website *string  `json:"website"`
+		Address *string  `json:"address"`
 		Mode    []string `json:"mode"`
 	}
 	// Initialize a new json.
@@ -158,21 +162,35 @@ func (app *application) updateTodoHandler(w http.ResponseWriter, r *http.Request
 		app.badRequestResponse(w, r, err)
 		return
 	}
-
-	//Copy / Update the fields / values in the todo variable using the fields in the input struct
-	todo.Name = input.Name
-	todo.Level = input.Level
-	todo.Contact = input.Contact
-	todo.Phone = input.Phone
-	todo.Email = input.Email
-	todo.Website = input.Website
-	todo.Address = input.Address
-	todo.Mode = input.Mode
+	//Check for updates
+	if input.Name != nil {
+		todo.Name = *input.Name
+	}
+	if input.Level != nil {
+		todo.Level = *input.Level
+	}
+	if input.Contact != nil {
+		todo.Contact = *input.Contact
+	}
+	if input.Phone != nil {
+		todo.Phone = *input.Phone
+	}
+	if input.Email != nil {
+		todo.Email = *input.Email
+	}
+	if input.Website != nil {
+		todo.Website = *input.Website
+	}
+	if input.Address != nil {
+		todo.Address = *input.Address
+	}
+	if input.Mode != nil {
+		todo.Mode = input.Mode
+	}
 	//Perform validation on the updated Todo.
 	//If validation fails, then send a 422 - Unprocessable Entity response to the client
 	// Initialize a new Validator instance
 	v := validator.New()
-
 	// check the map to see if there were validation errors
 	if data.ValidateList(v, todo); !v.Valid() {
 		app.failedValidationResponse(w, r, v.Errors)
@@ -198,7 +216,7 @@ func (app *application) deleteTodoHandler(w http.ResponseWriter, r *http.Request
 		app.notFoundResponse(w, r)
 		return
 	}
-	//Delete the School from the database. Send a 404 Not Found status code
+	//Delete the List from the database. Send a 404 Not Found status code
 	//to the client if there is no matching record
 	err = app.models.Todo.Delete(id)
 	if err != nil {
