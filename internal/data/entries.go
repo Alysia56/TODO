@@ -3,6 +3,7 @@
 package data
 
 import (
+	"database/sql"
 	"time"
 
 	"alysianorales.net/TODO/internal/validator"
@@ -49,4 +50,29 @@ func ValidateList(v *validator.Validator, todo *Todo) {
 	v.Check(len(todo.Mode) >= 1, "mode", "must contain at least one entries")
 	v.Check(len(todo.Mode) <= 5, "mode", "must contain at most 5 entries")
 	v.Check(validator.Unique(todo.Mode), "mode", "must not contain duplicate entries")
+}
+
+// Define a ListModel which wraps a sql.DB connection pool
+type TodoModel struct {
+	DB *sql.DB
+}
+
+// Insert () allows us to create a new List
+func (m TodoModel) Insert(todo *Todo) error {
+	return nil
+}
+
+//Get() allows us to retrieve a specific List
+func (m TodoModel) Get(id int64) (*Todo, error) {
+	return nil, nil
+}
+
+//Update() allows us to edit/alter a specific List
+func (m TodoModel) Update(todo *Todo) error {
+	return nil
+}
+
+//Delete() removes a specific List
+func (m TodoModel) Delete(id int64) error {
+	return nil
 }

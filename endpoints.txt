@@ -1,5 +1,6 @@
 Method  URL Pattern         Handler             Action
 GET     /v1/healtcheck      healtcheckHandler   Show application information
-POST    /v1/todo/:id        showTodoHandler     Create a new list
-GET     /v1/todo/:id        updateTodoHandler   Update list
-PUT     /v1/todo/:id        deleteTodoHandler   Delete a specific list
+POST    /v1/todo/:id        createTodoHandler   Create a new list
+GET     /v1/todo/:id        showTodoHandler     shows details of a specific list
+PUT     /v1/todo/:id        updateTodoHandler   update details of a specific list
+DELETE  /v1/todo/:id        deleteTodoHandler   Delete a specific list
