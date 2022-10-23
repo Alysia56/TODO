@@ -153,7 +153,7 @@ func (m TodoModel) Delete(id int64) error {
 		DELETE FROM todo
 		WHERE id = $1
 	`
-	//Execute the query
+	//Execute the query.
 	result, err := m.DB.Exec(query, id)
 	if err != nil {
 		return err
