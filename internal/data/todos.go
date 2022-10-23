@@ -202,3 +202,59 @@ func (m TodoModel) Delete(id int64) error {
 	return nil
 
 }
+
+//The GetAll() method returns a list of all the todos sorted by id
+func (m TodoModel) GetAll(name string, level string, mode []string, filters Filters) ([]*Todo, error) {
+	//Construct the query
+	query := `
+		SELECT id, created_at, name, 
+				level, contact,phone, 
+				email, website, address, mode, version
+		FROM todo
+		WHERE (LOWER(name) = LOWER($1) OR $1 = '')
+		AND (LOWER(level) = LOWER($2) OR $2 = '')
+		AND (mode @> $3 OR $3 = '{}' )
+		ORDER BY id
+	`
+	//Create a 3-second-timeout context
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+	//Execute the query
+	rows, err := m.DB.QueryContext(ctx, query, name, level, pq.Array(mode))
+	if err != nil {
+		return nil, err
+	}
+	//Close the result set
+	defer rows.Close()
+	//Initialize an empty slice to hold the Todo data
+	todos := []*Todo{}
+	//Iterate over the rows in the resultset
+	for rows.Next() {
+		var todo Todo
+		//Scan the values from the row into Todo
+		err := rows.Scan(
+			&todo.ID,
+			&todo.CreatedAt,
+			&todo.Name,
+			&todo.Level,
+			&todo.Contact,
+			&todo.Phone,
+			&todo.Email,
+			&todo.Website,
+			&todo.Address,
+			pq.Array(&todo.Mode),
+			&todo.Version,
+		)
+		if err != nil {
+			return nil, err
+		}
+		//Add the List to our slice
+		todos = append(todos, &todo)
+	}
+	// Check for errors after looping through the results set
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+	//Return the slice of Lists
+	return todos, nil
+}
