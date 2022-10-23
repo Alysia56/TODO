@@ -118,6 +118,7 @@ func (m TodoModel) Get(id int64) (*Todo, error) {
 }
 
 //Update() allows us to edit/alter a specific List
+//Optimistic locking (version number)
 func (m TodoModel) Update(todo *Todo) error {
 	//Create a query
 	query := `
@@ -126,6 +127,7 @@ func (m TodoModel) Update(todo *Todo) error {
 			phone = $4, email = $5, website = $6, 
 			address = $7, mode = $8, version = version + 1
 		WHERE id = $9
+		AND version = $10		
 		RETURNING version
 	`
 	args := []interface{}{
@@ -138,8 +140,19 @@ func (m TodoModel) Update(todo *Todo) error {
 		todo.Address,
 		pq.Array(todo.Mode),
 		todo.ID,
+		todo.Version,
 	}
-	return m.DB.QueryRow(query, args...).Scan(&todo.Version)
+	//Check for edit conflicts
+	err := m.DB.QueryRow(query, args...).Scan(&todo.Version)
+	if err != nil {
+		switch {
+		case errors.Is(err, sql.ErrNoRows):
+			return ErrEditConflict
+		default:
+			return err
+		}
+	}
+	return nil
 }
 
 //Delete() removes a specific List
