@@ -1,4 +1,4 @@
-BODY='{"name":"Apple tree", "level":"preschool", "contact":"Jane Smith", "phone":"501-607-1123", "email":"jsmith@xyz.edu.bz", "website":"http://xyz.edu.bz", "address":"17 Peach street", "mode":["online", "face-to-face"]}'
+BODY='{"name":"CandyLand", "level":"preschool", "contact":"Jane Smith", "phone":"501-607-1123", "email":"jsmith@xyz.edu.bz", "website":"http://xyz.edu.bz", "address":"17 Peach street", "mode":["online", "face-to-face"]}'
 
 
 BODY='{"name":"XYZ", "level":"preschool", "contact":"Jane Smith", "phone":"501-607-1123", "email":"jsmith@xyz.edu.bz", "address":"17 Peach street", "mode":["online", "face-to-face"]}'

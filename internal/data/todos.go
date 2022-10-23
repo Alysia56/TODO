@@ -119,7 +119,27 @@ func (m TodoModel) Get(id int64) (*Todo, error) {
 
 //Update() allows us to edit/alter a specific List
 func (m TodoModel) Update(todo *Todo) error {
-	return nil
+	//Create a query
+	query := `
+		UPDATE todo
+		SET name = $1, level = $2, contact = $3, 
+			phone = $4, email = $5, website = $6, 
+			address = $7, mode = $8, version = version + 1
+		WHERE id = $9
+		RETURNING version
+	`
+	args := []interface{}{
+		todo.Name,
+		todo.Level,
+		todo.Contact,
+		todo.Phone,
+		todo.Email,
+		todo.Website,
+		todo.Address,
+		pq.Array(todo.Mode),
+		todo.ID,
+	}
+	return m.DB.QueryRow(query, args...).Scan(&todo.Version)
 }
 
 //Delete() removes a specific List

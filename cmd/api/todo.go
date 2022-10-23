@@ -70,7 +70,7 @@ func (app *application) createTodoHandler(w http.ResponseWriter, r *http.Request
 	}
 }
 
-//createTodoHandler for the "GET /v1/todo/:id" endpoint
+//showTodoHandler for the "GET /v1/todo/:id" endpoint
 func (app *application) showTodoHandler(w http.ResponseWriter, r *http.Request) {
 	// Get the value of the "id" parameter
 	id, err := app.readIDParam(r)
@@ -79,7 +79,7 @@ func (app *application) showTodoHandler(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	// Fetch the specific todo
+	// Fetch the specific List
 	todo, err := app.models.Todo.Get(id)
 	//Handle errors
 	if err != nil {
@@ -119,4 +119,75 @@ func (app *application) showRandomString(w http.ResponseWriter, r *http.Request)
 		app.serverErrorResponse(w, r, err)
 		return
 	}
+}
+
+func (app *application) updateTodoHandler(w http.ResponseWriter, r *http.Request) {
+	//This method does a complete replacement
+	//Get the id for the List that needs updating
+	id, err := app.readIDParam(r)
+	if err != nil {
+		app.notFoundResponse(w, r)
+		return
+	}
+	//Fetch the original record from the database
+	todo, err := app.models.Todo.Get(id)
+	//Handle errors
+	if err != nil {
+		switch {
+		case errors.Is(err, data.ErrRecordNotFound):
+			app.notFoundResponse(w, r)
+		default:
+			app.serverErrorResponse(w, r, err)
+		}
+		return
+	}
+	// Create an input struct to hold data read in from the client
+	var input struct {
+		Name    string   `json:"name"`
+		Level   string   `json:"level"`
+		Contact string   `json:"contact"`
+		Phone   string   `json:"phone"`
+		Email   string   `json:"email"`
+		Website string   `json:"website"`
+		Address string   `json:"address"`
+		Mode    []string `json:"mode"`
+	}
+	// Initialize a new json.
+	err = app.readJSON(w, r, &input)
+	if err != nil {
+		app.badRequestResponse(w, r, err)
+		return
+	}
+
+	//Copy / Update the fields / values in the todo variable using the fields in the input struct
+	todo.Name = input.Name
+	todo.Level = input.Level
+	todo.Contact = input.Contact
+	todo.Phone = input.Phone
+	todo.Email = input.Email
+	todo.Website = input.Website
+	todo.Address = input.Address
+	todo.Mode = input.Mode
+	//Perform validation on the updated School.
+	//If validation fails, then send a 422 - Unprocessable Entity response to the client
+	// Initialize a new Validator instance
+	v := validator.New()
+
+	// check the map to see if there were validation errors
+	if data.ValidateList(v, todo); !v.Valid() {
+		app.failedValidationResponse(w, r, v.Errors)
+		return
+	}
+	// Pass the updates School record to the Update() method
+	err = app.models.Todo.Update(todo)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+		return
+	}
+	//Write the data returned by Get()
+	err = app.writeJSON(w, http.StatusOK, envelope{"todo": todo}, nil)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+	}
+
 }
