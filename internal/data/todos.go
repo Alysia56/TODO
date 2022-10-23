@@ -4,6 +4,7 @@ package data
 
 import (
 	"database/sql"
+	"errors"
 	"time"
 
 	"alysianorales.net/TODO/internal/validator"
@@ -76,7 +77,44 @@ func (m TodoModel) Insert(todo *Todo) error {
 
 //Get() allows us to retrieve a specific List
 func (m TodoModel) Get(id int64) (*Todo, error) {
-	return nil, nil
+	//Ensure that there is a valid id
+	if id < 1 {
+		return nil, ErrRecordNotFound
+	}
+	//Create the query
+	query := `
+		SELECT id, created_at, name, level, contact, phone, email, website, address, mode, version
+		FROM todo
+		WHERE id = $1
+	`
+	//Declare a Todo variable to hold the returned data
+	var todo Todo
+	//Exexcute the query using QueryRow()
+	err := m.DB.QueryRow(query, id).Scan(
+		&todo.ID,
+		&todo.CreatedAt,
+		&todo.Name,
+		&todo.Level,
+		&todo.Contact,
+		&todo.Phone,
+		&todo.Email,
+		&todo.Website,
+		&todo.Address,
+		pq.Array(&todo.Mode),
+		&todo.Version,
+	)
+	//Handle any errors
+	if err != nil {
+		//Check the type of error
+		switch {
+		case errors.Is(err, sql.ErrNoRows):
+			return nil, ErrRecordNotFound
+		default:
+			return nil, err
+		}
+	}
+	//Success
+	return &todo, nil
 }
 
 //Update() allows us to edit/alter a specific List
