@@ -1,8 +1,5 @@
-BODY='{"name":"CandyLand", "level":"preschool", "contact":"Jane Smith", "phone":"501-607-1123", "email":"jsmith@xyz.edu.bz", "website":"http://xyz.edu.bz", "address":"17 Peach street", "mode":["online", "face-to-face"]}'
-
-
-BODY='{"name":"XYZ", "level":"preschool", "contact":"Jane Smith", "phone":"501-607-1123", "email":"jsmith@xyz.edu.bz", "address":"17 Peach street", "mode":["online", "face-to-face"]}'
-
-BODY='{"name":"XYZ", "level":"preschool", "contact":"Jane Smith", "phone":"501-607-1123", "address":"17 Peach street", "mode":["online", "face-to-face"]}'
-
-BODY='{"name":"XYZ", "level":"preschool", "contact":"Jane Smith", "phone":"501-607-1123", "email":null, "website":null, "address":"17 Peach street", "mode":["online", "face-to-face"]}'
+BODY='{"title":"CMPS-4923","label":"UB", "task":"study", "priority":"urgent","status":"completed", "website":"http://xyz.edu.bz", "address":"17 Peach street", "mode":["online", "face-to-face"]}'
+BODY='{"title":"CMPS-4000","label":"UB", "task":"study", "priority":"urgent","status":"incomplete", "website":"http://xyz.edu.bz", "address":"17 Peach street", "mode":["online", "face-to-face"]}'
+BODY='{"title":"Groceries","label":"Shopping", "task":"buy apples", "priority":"normal","status":"incomplete", "website":"http://xyz.edu.bz", "address":"84 tintersville street", "mode":["online", "face-to-face"]}'
+BODY='{"title":"Groceries","label":"Shopping", "task":"buy chicken", "priority":"medium","status":"incomplete", "website":"http://xyz.edu.bz", "address":"42 litter street", "mode":["online", "face-to-face"]}'
+BODY='{"title":"Leisure","label":"Family", "task":"visit family", "priority":"urgent","status":"completed", "website":"http://xyz.edu.bz", "address":"17 melon street", "mode":["online", "face-to-face"]}'

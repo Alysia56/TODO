@@ -3,30 +3,67 @@ curl "localhost:4000/v1/todo"
 
 
                 --TEXT SEARCH TESTING--
-curl "localhost:4000/v1/todo?name=avacado+house"
-curl "localhost:4000/v1/todo?level=high+school"
+curl "localhost:4000/v1/todo?title=Groceries"
+curl "localhost:4000/v1/todo?address=peach+street"
 curl "localhost:4000/v1/todo?mode=face-to-face"
-curl "localhost:4000/v1/todo?name=love+house&level=preschool"
-curl "localhost:4000/v1/todo?name=coconut"
+curl "localhost:4000/v1/todo?title=CMPS-4923&label=study"
 curl "localhost:4000/v1/todo?mode=face"
 
 
 
                     --SORT TESTING--
-curl "localhost:4000/v1/todo?sort=name"
-curl "localhost:4000/v1/todo?sort=level"
-curl "localhost:4000/v1/todo?sort=contact"
+curl "localhost:4000/v1/todo?sort=title"
+curl "localhost:4000/v1/todo?sort=label"
+curl "localhost:4000/v1/todo?sort=task"
 curl "localhost:4000/v1/todo?sort=id"
-curl "localhost:4000/v1/todo?sort=email"
+curl "localhost:4000/v1/todo?sort=status"
 
 
 
                 --PAGINATION TESTING--
-curl "localhost:4000/v1/todo?page=1&page_size=5"
-curl "localhost:4000/v1/todo?page=2&page_size=5"
-curl "localhost:4000/v1/todo?page=3&page_size=5"
+curl "localhost:4000/v1/todo?page=1&page_size=1"
+curl "localhost:4000/v1/todo?page=1&page_size=2"
+curl "localhost:4000/v1/todo?page=1&page_size=3"
 curl "localhost:4000/v1/todo?page=4&page_size=5"
 curl "localhost:4000/v1/todo?page=5&page_size=5"
 curl "localhost:4000/v1/todo?page=6&page_size=5"
 
 
+elm make src/Todo.elm --output Todo.js      -- run elm code
+
+
+-------- show list ---------
+curl localhost:4000/v1/todo 
+
+-------- show Pages ---------
+curl "localhost:4000/v1/todo?name=Groceries&label=Shopping&mode=online,face-to-face&page=1&page_size=2&sort=status" 
+
+-------- show Pages ---------
+curl -w '\nTime: %{time_total}s \n' -i localhost:4000/v1/todo/4
+
+-------- Delete Pages ---------
+curl -X DELETE localhost:4000/v1/todo/1
+curl -X DELETE localhost:4000/v1/todo/1
+
+
+------------Filtering List Data ----------
+curl "localhost:4000/v1/todo?name=apple+tree"
+curl "localhost:4000/v1/todo?mode=face-to-face"
+curl "localhost:4000/v1/todo?name=avocado+house"       {empty string example}
+
+
+------------Full Text Search ----------
+curl "localhost:4000/v1/todo?name=Apple"
+curl "localhost:4000/v1/todo?level=preschool"
+
+
+------------Sorting List ----------
+curl "localhost:4000/v1/todo?sort=name"
+curl "localhost:4000/v1/todo?sort=-name"                     {descending}
+
+----------- Pagination -------------------
+curl "localhost:4000/v1/todo?page=1&page_size=5"
+curl "localhost:4000/v1/todo?page_size=5"
+
+------ Show Metadata --------------------
+curl "localhost:4000/v1/todo?sort=level"

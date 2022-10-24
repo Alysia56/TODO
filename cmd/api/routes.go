@@ -16,7 +16,7 @@ func (app *application) routes() *httprouter.Router {
 	router.HandlerFunc(http.MethodGet, "/v1/todo", app.listTodoHandler)
 	router.HandlerFunc(http.MethodPost, "/v1/todo", app.createTodoHandler)
 	router.HandlerFunc(http.MethodGet, "/v1/todo/:id", app.showTodoHandler)
-	router.HandlerFunc(http.MethodGet, "/v1/stringrandom/:id", app.showRandomString)
+	//router.HandlerFunc(http.MethodGet, "/v1/stringrandom/:id", app.showRandomString)
 	router.HandlerFunc(http.MethodPatch, "/v1/todo/:id", app.updateTodoHandler)
 	router.HandlerFunc(http.MethodDelete, "/v1/todo/:id", app.deleteTodoHandler)
 	return router

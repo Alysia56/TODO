@@ -16,11 +16,11 @@ import (
 type Todo struct {
 	ID        int64     `json:"id"`
 	CreatedAt time.Time `json:"-"`
-	Name      string    `json:"name"`
-	Level     string    `json:"level"`
-	Contact   string    `json:"contact"`
-	Phone     string    `json:"phone"`
-	Email     string    `json:"email,omitempty"`
+	Title     string    `json:"title"`
+	Label     string    `json:"label"`
+	Task      string    `json:"task"`
+	Priority  string    `json:"priority"`
+	Status    string    `json:"status,omitempty"`
 	Website   string    `json:"website,omitempty"`
 	Address   string    `json:"address"`
 	Mode      []string  `json:"mode"`
@@ -29,20 +29,20 @@ type Todo struct {
 
 func ValidateList(v *validator.Validator, todo *Todo) {
 	// Check() method to execute
-	v.Check(todo.Name != "", "name", "must be provided")
-	v.Check(len(todo.Name) <= 200, "name", "must not be more than 200 bytes long")
+	v.Check(todo.Title != "", "title", "must be provided")
+	v.Check(len(todo.Title) <= 200, "title", "must not be more than 200 bytes long")
 
-	v.Check(todo.Level != "", "level", "must be provided")
-	v.Check(len(todo.Level) <= 200, "level", "must not be more than 200 bytes long")
+	v.Check(todo.Label != "", "label", "must be provided")
+	v.Check(len(todo.Label) <= 200, "label", "must not be more than 200 bytes long")
 
-	v.Check(todo.Contact != "", "contact", "must be provided")
-	v.Check(len(todo.Contact) <= 200, "contact", "must not be more than 200 bytes long")
+	v.Check(todo.Task != "", "task", "must be provided")
+	v.Check(len(todo.Task) <= 200, "task", "must not be more than 200 bytes long")
 
-	v.Check(todo.Phone != "", "phone", "must be provided")
-	v.Check(validator.Matches(todo.Phone, validator.PhoneRX), "phone", "must be a valid phone number")
+	v.Check(todo.Priority != "", "priority", "must be provided")
+	//v.Check(validator.Matches(todo.Priority, validator.PriorityRX), "priority", "must be a valid priority number")
 
-	v.Check(todo.Email != "", "email", "must be provided")
-	v.Check(validator.Matches(todo.Email, validator.EmailRX), "email", "must be a valid email")
+	v.Check(todo.Status != "", "status", "must be provided")
+	//v.Check(validator.Matches(todo.Status, validator.StatusRX), "status", "must be a valid status")
 
 	v.Check(todo.Website != "", "website", "must be provided")
 	v.Check(validator.ValidWebsite(todo.Website), "website", "must be a valid url")
@@ -64,7 +64,7 @@ type TodoModel struct {
 // Insert () allows us to create a new List
 func (m TodoModel) Insert(todo *Todo) error {
 	query := `
-	INSERT INTO todo (name, level, contact, phone, email, website, address, mode)
+	INSERT INTO todo (title, label, task, priority, status, website, address, mode)
 	VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
 	RETURNING id, created_at, version
 	`
@@ -74,8 +74,8 @@ func (m TodoModel) Insert(todo *Todo) error {
 	defer cancel()
 	//Collect data fields into a slice
 	args := []interface{}{
-		todo.Name, todo.Level, todo.Contact,
-		todo.Phone, todo.Email, todo.Website,
+		todo.Title, todo.Label, todo.Task,
+		todo.Priority, todo.Status, todo.Website,
 		todo.Address, pq.Array(todo.Mode),
 	}
 	return m.DB.QueryRowContext(ctx, query, args...).Scan(&todo.ID, &todo.CreatedAt, &todo.Version)
@@ -89,7 +89,7 @@ func (m TodoModel) Get(id int64) (*Todo, error) {
 	}
 	//Create the query
 	query := `
-		SELECT id, created_at, name, level, contact, phone, email, website, address, mode, version
+		SELECT id, created_at, title, label, task, priority, status, website, address, mode, version
 		FROM todo
 		WHERE id = $1
 	`
@@ -103,11 +103,11 @@ func (m TodoModel) Get(id int64) (*Todo, error) {
 	err := m.DB.QueryRowContext(ctx, query, id).Scan(
 		&todo.ID,
 		&todo.CreatedAt,
-		&todo.Name,
-		&todo.Level,
-		&todo.Contact,
-		&todo.Phone,
-		&todo.Email,
+		&todo.Title,
+		&todo.Label,
+		&todo.Task,
+		&todo.Priority,
+		&todo.Status,
 		&todo.Website,
 		&todo.Address,
 		pq.Array(&todo.Mode),
@@ -133,8 +133,8 @@ func (m TodoModel) Update(todo *Todo) error {
 	//Create a query
 	query := `
 		UPDATE todo
-		SET name = $1, level = $2, contact = $3, 
-			phone = $4, email = $5, website = $6, 
+		SET title = $1, label = $2, task = $3, 
+			priority = $4, status = $5, website = $6, 
 			address = $7, mode = $8, version = version + 1
 		WHERE id = $9
 		AND version = $10		
@@ -146,11 +146,11 @@ func (m TodoModel) Update(todo *Todo) error {
 	defer cancel()
 
 	args := []interface{}{
-		todo.Name,
-		todo.Level,
-		todo.Contact,
-		todo.Phone,
-		todo.Email,
+		todo.Title,
+		todo.Label,
+		todo.Task,
+		todo.Priority,
+		todo.Status,
 		todo.Website,
 		todo.Address,
 		pq.Array(todo.Mode),
@@ -205,15 +205,15 @@ func (m TodoModel) Delete(id int64) error {
 }
 
 //The GetAll() method returns a list of all the todos sorted by id
-func (m TodoModel) GetAll(name string, level string, mode []string, filters Filters) ([]*Todo, Metadata, error) {
+func (m TodoModel) GetAll(title string, label string, mode []string, filters Filters) ([]*Todo, Metadata, error) {
 	//Construct the query
 	query := fmt.Sprintf(`
-		SELECT COUNT (*) OVER(), id, created_at, name, 
-				level, contact,phone, 
-				email, website, address, mode, version
+		SELECT COUNT (*) OVER(), id, created_at, title, 
+				label, task,priority, 
+				status, website, address, mode, version
 		FROM todo
-		WHERE (to_tsvector('simple', name) @@ plainto_tsquery('simple', $1) OR $1 = '')
-		AND (to_tsvector('simple', level) @@ plainto_tsquery('simple', $2) OR $2 = '')
+		WHERE (to_tsvector('simple', title) @@ plainto_tsquery('simple', $1) OR $1 = '')
+		AND (to_tsvector('simple', label) @@ plainto_tsquery('simple', $2) OR $2 = '')
 		AND (mode @> $3 OR $3 = '{}' )
 		ORDER BY %s %s, id ASC
 		LIMIT $4 OFFSET $5`, filters.sortColumn(), filters.sortOrder())
@@ -221,7 +221,7 @@ func (m TodoModel) GetAll(name string, level string, mode []string, filters Filt
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 	//Execute the query
-	args := []interface{}{name, level, pq.Array(mode), filters.limit(), filters.offset()}
+	args := []interface{}{title, label, pq.Array(mode), filters.limit(), filters.offset()}
 	rows, err := m.DB.QueryContext(ctx, query, args...)
 	if err != nil {
 		return nil, Metadata{}, err
@@ -239,11 +239,11 @@ func (m TodoModel) GetAll(name string, level string, mode []string, filters Filt
 			&totalRecords,
 			&todo.ID,
 			&todo.CreatedAt,
-			&todo.Name,
-			&todo.Level,
-			&todo.Contact,
-			&todo.Phone,
-			&todo.Email,
+			&todo.Title,
+			&todo.Label,
+			&todo.Task,
+			&todo.Priority,
+			&todo.Status,
 			&todo.Website,
 			&todo.Address,
 			pq.Array(&todo.Mode),

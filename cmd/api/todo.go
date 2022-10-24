@@ -16,14 +16,14 @@ import (
 func (app *application) createTodoHandler(w http.ResponseWriter, r *http.Request) {
 	// Our Target Decode destination
 	var input struct {
-		Name    string   `json:"name"`
-		Level   string   `json:"level"`
-		Contact string   `json:"contact"`
-		Phone   string   `json:"phone"`
-		Email   string   `json:"email"`
-		Website string   `json:"website"`
-		Address string   `json:"address"`
-		Mode    []string `json:"mode"`
+		Title    string   `json:"title"`
+		Label    string   `json:"label"`
+		Task     string   `json:"task"`
+		Priority string   `json:"priority"`
+		Status   string   `json:"status"`
+		Website  string   `json:"website"`
+		Address  string   `json:"address"`
+		Mode     []string `json:"mode"`
 	}
 	// Initialize a new json.
 	err := app.readJSON(w, r, &input)
@@ -35,11 +35,11 @@ func (app *application) createTodoHandler(w http.ResponseWriter, r *http.Request
 	todo := &data.Todo{
 		ID:        0,
 		CreatedAt: time.Time{},
-		Name:      input.Name,
-		Level:     input.Level,
-		Contact:   input.Contact,
-		Phone:     input.Phone,
-		Email:     input.Email,
+		Title:     input.Title,
+		Label:     input.Label,
+		Task:      input.Task,
+		Priority:  input.Priority,
+		Status:    input.Status,
 		Website:   input.Website,
 		Address:   input.Address,
 		Mode:      input.Mode,
@@ -98,28 +98,28 @@ func (app *application) showTodoHandler(w http.ResponseWriter, r *http.Request) 
 	}
 }
 
-func (app *application) showRandomString(w http.ResponseWriter, r *http.Request) {
+// func (app *application) showRandomString(w http.ResponseWriter, r *http.Request) {
 
-	id, err := app.readIDParam(r)
-	if err != nil {
-		app.notFoundResponse(w, r)
-		return
-	}
+// 	id, err := app.readIDParam(r)
+// 	if err != nil {
+// 		app.notFoundResponse(w, r)
+// 		return
+// 	}
 
-	integer := int(id)
-	tools := &data.Tools{}
+// 	integer := int(id)
+// 	tools := &data.Tools{}
 
-	random := tools.GenerateRandomString(integer)
-	data := envelope{
-		"Here is your randomize string": random,
-		"Your :id is ":                  integer,
-	}
-	err = app.writeJSON(w, http.StatusOK, data, nil)
-	if err != nil {
-		app.serverErrorResponse(w, r, err)
-		return
-	}
-}
+// 	random := tools.GenerateRandomString(integer)
+// 	data := envelope{
+// 		"Here is your randomize string": random,
+// 		"Your :id is ":                  integer,
+// 	}
+// 	err = app.writeJSON(w, http.StatusOK, data, nil)
+// 	if err != nil {
+// 		app.serverErrorResponse(w, r, err)
+// 		return
+// 	}
+// }
 
 func (app *application) updateTodoHandler(w http.ResponseWriter, r *http.Request) {
 	//This method does a partial replacement
@@ -147,14 +147,14 @@ func (app *application) updateTodoHandler(w http.ResponseWriter, r *http.Request
 	//If a field remains nil, then we know that the client
 	//did not update it
 	var input struct {
-		Name    *string  `json:"name"`
-		Level   *string  `json:"level"`
-		Contact *string  `json:"contact"`
-		Phone   *string  `json:"phone"`
-		Email   *string  `json:"email"`
-		Website *string  `json:"website"`
-		Address *string  `json:"address"`
-		Mode    []string `json:"mode"`
+		Title    *string  `json:"title"`
+		Label    *string  `json:"label"`
+		Task     *string  `json:"task"`
+		Priority *string  `json:"priority"`
+		Status   *string  `json:"status"`
+		Website  *string  `json:"website"`
+		Address  *string  `json:"address"`
+		Mode     []string `json:"mode"`
 	}
 	// Initialize a new json.
 	err = app.readJSON(w, r, &input)
@@ -163,20 +163,20 @@ func (app *application) updateTodoHandler(w http.ResponseWriter, r *http.Request
 		return
 	}
 	//Check for updates
-	if input.Name != nil {
-		todo.Name = *input.Name
+	if input.Title != nil {
+		todo.Title = *input.Title
 	}
-	if input.Level != nil {
-		todo.Level = *input.Level
+	if input.Label != nil {
+		todo.Label = *input.Label
 	}
-	if input.Contact != nil {
-		todo.Contact = *input.Contact
+	if input.Task != nil {
+		todo.Task = *input.Task
 	}
-	if input.Phone != nil {
-		todo.Phone = *input.Phone
+	if input.Priority != nil {
+		todo.Priority = *input.Priority
 	}
-	if input.Email != nil {
-		todo.Email = *input.Email
+	if input.Status != nil {
+		todo.Status = *input.Status
 	}
 	if input.Website != nil {
 		todo.Website = *input.Website
@@ -246,8 +246,8 @@ func (app *application) deleteTodoHandler(w http.ResponseWriter, r *http.Request
 func (app *application) listTodoHandler(w http.ResponseWriter, r *http.Request) {
 	//Create an input struct to hold our query parameters
 	var input struct {
-		Name  string
-		Level string
+		Title string
+		Label string
 		Mode  []string
 		data.Filters
 	}
@@ -256,8 +256,8 @@ func (app *application) listTodoHandler(w http.ResponseWriter, r *http.Request) 
 	//Get the URL values map
 	qs := r.URL.Query()
 	//Use the helper methods to extract the values
-	input.Name = app.readString(qs, "name", "")
-	input.Level = app.readString(qs, "level", "")
+	input.Title = app.readString(qs, "title", "")
+	input.Label = app.readString(qs, "label", "")
 	input.Mode = app.readCSV(qs, "mode", []string{})
 	//Get the page information
 	input.Filters.Page = app.readInt(qs, "page", 1, v)
@@ -265,14 +265,14 @@ func (app *application) listTodoHandler(w http.ResponseWriter, r *http.Request) 
 	//Get the sort information
 	input.Filters.Sort = app.readString(qs, "sort", "id")
 	//Specify the allowed sort values
-	input.Filters.SortList = []string{"id", "name", "level", "-id", "-name", "-level"}
+	input.Filters.SortList = []string{"id", "title", "label", "-id", "-title", "-label"}
 	//Check for validation errors
 	if data.ValidateFilters(v, input.Filters); !v.Valid() {
 		app.failedValidationResponse(w, r, v.Errors)
 		return
 	}
 	//Get a listing of all Lists
-	todos, metadata, err := app.models.Todo.GetAll(input.Name, input.Level, input.Mode, input.Filters)
+	todos, metadata, err := app.models.Todo.GetAll(input.Title, input.Label, input.Mode, input.Filters)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 		return
