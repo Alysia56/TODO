@@ -7,7 +7,7 @@ import (
 	"github.com/julienschmidt/httprouter"
 )
 
-func (app *application) routes() *httprouter.Router {
+func (app *application) routes() *http.Handler {
 	// Create a new HttpRouter router instance
 	router := httprouter.New()
 	router.NotFound = http.HandlerFunc(app.notFoundResponse)
@@ -19,5 +19,6 @@ func (app *application) routes() *httprouter.Router {
 	//router.HandlerFunc(http.MethodGet, "/v1/stringrandom/:id", app.showRandomString)
 	router.HandlerFunc(http.MethodPatch, "/v1/todo/:id", app.updateTodoHandler)
 	router.HandlerFunc(http.MethodDelete, "/v1/todo/:id", app.deleteTodoHandler)
-	return router
+
+	return app.recoverPanic(app.rateLimit(router))
 }
