@@ -36,6 +36,11 @@ type config struct {
 		maxIdleConns int
 		maxIdleTime  string
 	}
+	limiter struct {
+		rps     float64 //requests/second
+		burst   int
+		enabled bool
+	}
 }
 
 // Define an application struct to hold the dependencies for our HTTP handlers, helpers,
@@ -101,7 +106,7 @@ func main() {
 	}
 
 	// Start the HTTP server.
-	logger.PrintInfo("startingserver on", map[string]string{
+	logger.PrintInfo("starting server on", map[string]string{
 		"addr": srv.Addr,
 		"env":  cfg.env,
 	})

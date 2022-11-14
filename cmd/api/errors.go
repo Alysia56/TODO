@@ -12,7 +12,7 @@ func (app *application) logError(r *http.Request, err error) {
 	})
 }
 
-// We want to send JSON formatted error messages
+// We want to send JSON-formatted error message
 func (app *application) errorResponse(w http.ResponseWriter, r *http.Request, status int, message interface{}) {
 	// Create the JSON response
 	env := envelope{"error": message}
@@ -23,42 +23,41 @@ func (app *application) errorResponse(w http.ResponseWriter, r *http.Request, st
 	}
 }
 
-// Server error Response
+// Server error response
 func (app *application) serverErrorResponse(w http.ResponseWriter, r *http.Request, err error) {
-	// log the error
+	// We log the error
 	app.logError(r, err)
-	// Prepare a meage with the error
+	// Prepare a message with the error
 	message := "the server encounted a problem and could not process the request"
 	app.errorResponse(w, r, http.StatusInternalServerError, message)
 }
 
-// Not Found Response
+// The not found response
 func (app *application) notFoundResponse(w http.ResponseWriter, r *http.Request) {
-	// Create message
-	message := "The requested resources could not be found."
+	// Creat our message
+	message := "the requested resource could not be found"
 	app.errorResponse(w, r, http.StatusNotFound, message)
 }
 
-// Not Allowed Response
+// A method not allowed response
 func (app *application) methodNotAllowedResponse(w http.ResponseWriter, r *http.Request) {
-	// Create message
-	message := fmt.Sprintf("The %s method is not supported for this resource.", r.Method)
+	// Creat our message
+	message := fmt.Sprintf("the %s method is not supported for this resource", r.Method)
 	app.errorResponse(w, r, http.StatusMethodNotAllowed, message)
 }
 
-// User Provided Bad Request
+// User provided a bad request
 func (app *application) badRequestResponse(w http.ResponseWriter, r *http.Request, err error) {
-	// Create message
 	app.errorResponse(w, r, http.StatusBadRequest, err.Error())
 }
 
-// User provided an invalid Validation
+// Validation error
 func (app *application) failedValidationResponse(w http.ResponseWriter, r *http.Request, errors map[string]string) {
 	app.errorResponse(w, r, http.StatusUnprocessableEntity, errors)
 }
 
-//Edit Conflict Error
+// Edit Conflict error
 func (app *application) editConflictResponse(w http.ResponseWriter, r *http.Request) {
-	message := "unable to update the record due to an edit conflict, please try again."
+	message := "unable to update the record due to an edit conflict, please try again"
 	app.errorResponse(w, r, http.StatusConflict, message)
 }
