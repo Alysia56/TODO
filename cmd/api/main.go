@@ -7,10 +7,12 @@ import (
 	"database/sql"
 	"flag"
 	"os"
+	"sync"
 	"time"
 
 	"alysianorales.net/TODO/internal/data"
 	"alysianorales.net/TODO/internal/jsonlog"
+	"alysianorales.net/TODO/internal/mailer"
 	_ "github.com/lib/pq"
 )
 
@@ -38,6 +40,13 @@ type config struct {
 		burst   int
 		enabled bool
 	}
+	smtp struct {
+		host     string
+		port     int
+		username string // from MailTrap setting
+		password string
+		sender   string
+	}
 }
 
 // Define an application struct to hold the dependencies for our HTTP handlers, helpers,
@@ -47,6 +56,8 @@ type application struct {
 	config config
 	logger *jsonlog.Logger
 	models data.Models
+	mailer mailer.Mailer
+	wg     sync.WaitGroup
 }
 
 func main() {
@@ -66,6 +77,12 @@ func main() {
 	flag.Float64Var(&cfg.limiter.rps, "limiter-rps", 2, "Rate limiter maximum requests per second")
 	flag.IntVar(&cfg.limiter.burst, "limiter-burst", 2, "Rate limiter maximum burst")
 	flag.BoolVar(&cfg.limiter.enabled, "limiter-enabled", true, "Enabled rate limiter")
+	// These are our flags for the mailer
+	flag.StringVar(&cfg.smtp.host, "smtp-host", "smtp.mailtrap.io", "SMTP host")
+	flag.IntVar(&cfg.smtp.port, "smtp-port", 2525, "SMTP port")
+	flag.StringVar(&cfg.smtp.username, "smtp-username", "e22b0fdfd0418e", "SMTP username")
+	flag.StringVar(&cfg.smtp.password, "smtp-password", "a73a13e8d0e44b", "SMTP password")
+	flag.StringVar(&cfg.smtp.sender, "smtp-sender", "TODO <no-reply@alysianorales.net/TODO>", "SMTP sender")
 
 	flag.Parse()
 
@@ -88,6 +105,7 @@ func main() {
 		config: cfg,
 		logger: logger,
 		models: data.NewModels(db),
+		mailer: mailer.New(cfg.smtp.host, cfg.smtp.port, cfg.smtp.username, cfg.smtp.password, cfg.smtp.sender),
 	}
 	//Call app.serve() to start the server
 	err = app.serve()

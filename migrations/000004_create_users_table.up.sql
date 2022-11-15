@@ -1,4 +1,4 @@
--- Filename: migrations/000004_create_todo_users.up.sq1
+-- Filename : 000001_create_users_table.up.sql
 
 CREATE TABLE IF NOT EXISTS users (
     id bigserial PRIMARY KEY,
@@ -6,7 +6,6 @@ CREATE TABLE IF NOT EXISTS users (
     name text NOT NULL, 
     email citext UNIQUE NOT NULL,
     password_hash bytea NOT NULL,
-    website text NOT NULL,
-    activated bool NOT NUll,
-    version integer NOT NULL DEFAULT 1
+    activated bool NOT NULL, 
+    version int NOT NULL DEFAULT 1
 );

@@ -27,7 +27,6 @@ func (app *application) serve() error {
 	// The Shutdown() function should return its error to this channel
 	shutdownError := make(chan error)
 
-	// Start a background Goroutine
 	go func() {
 		// Create a quit/exit channel which carries os.Signal values
 		quit := make(chan os.Signal, 1)
@@ -43,7 +42,16 @@ func (app *application) serve() error {
 		ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
 		defer cancel()
 		// Call the Shutdown() function
-		shutdownError <- srv.Shutdown(ctx)
+		err := srv.Shutdown(ctx)
+		if err != nil {
+			shutdownError <- err
+		}
+		// log a message about the go routines
+		app.logger.PrintInfo("Completing background tasks", map[string]string{
+			"addr": srv.Addr,
+		})
+		app.wg.Wait()
+		shutdownError <- nil
 	}()
 
 	// Start our server
