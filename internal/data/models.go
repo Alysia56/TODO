@@ -14,16 +14,18 @@ var (
 
 //A wrapper for our data models
 type Models struct {
-	Todo   TodoModel
-	Tokens TokenModel
-	Users  UserModel
+	Permissions PermissionModel
+	Todo        TodoModel
+	Tokens      TokenModel
+	Users       UserModel
 }
 
 //New Models() allows us to create a new Model
 func NewModels(db *sql.DB) Models {
 	return Models{
-		Todo:   TodoModel{DB: db},
-		Tokens: TokenModel{DB: db},
-		Users:  UserModel{DB: db},
+		Permissions: PermissionModel{DB: db},
+		Todo:        TodoModel{DB: db},
+		Tokens:      TokenModel{DB: db},
+		Users:       UserModel{DB: db},
 	}
 }
